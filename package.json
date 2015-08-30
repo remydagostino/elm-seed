@@ -10,6 +10,7 @@
   },
   "author": "Remy D'Agostino",
   "license": "ISC",
+  "repository": "https://github.com/remydagostino/elm-seed",
   "dependencies": {
     "bluebird": "2.9.34",
     "browserify": "11.0.0",

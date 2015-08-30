@@ -3,33 +3,32 @@
 var assert = require('chai').assert;
 var sinon = require('sinon');
 var Bluebird = require('bluebird');
-var elmCompile = require('../src/build/elm-compile');
 var readableFrom = require('from');
 
 var MINIFIED_CODE_PLACEHOLDER = 'minified_code';
 
 suite('Elm compile', function() {
   test('success case (dev)', function(done) {
-    var elm = elmCompileSpy({});
+    var elmBuild = elmCompileSpy({});
 
-    elm.elmCompile.devBuild('/elm', '/build').then(function() {
-      assert.ok(elm.spawnSpy.calledOnce, 'Only one elm process spawned');
-      assert.ok(!elm.jsMinifySpy.called, 'Minifier was not invoked');
+    elmBuild.module.devBuild('/elm', '/build').then(function() {
+      assert.ok(elmBuild.spawnSpy.calledOnce, 'Only one elm process spawned');
+      assert.ok(!elmBuild.jsMinifySpy.called, 'Minifier was not invoked');
 
       assert.match(
-        elm.spawnSpy.args[0][0],
+        elmBuild.spawnSpy.args[0][0],
         /node_modules\/elm\/vendor\/elm-make$/,
         'Local elm make executable was used'
       );
 
       assert.deepEqual(
-        elm.spawnSpy.args[0][1],
+        elmBuild.spawnSpy.args[0][1],
         ['/elm/App.elm', '--yes', '--output', '/build/elm.js'],
         'Elm make called with the correct arguments'
       );
 
       assert.propertyVal(
-        elm.spawnSpy.args[0][2],
+        elmBuild.spawnSpy.args[0][2],
         'stdio',
         'pipe',
         'All process output is being piped back into the program'
@@ -40,15 +39,15 @@ suite('Elm compile', function() {
   });
 
   test('success case (production)', function(done) {
-    var elm = elmCompileSpy({});
+    var elmBuild = elmCompileSpy({});
 
-    elm.elmCompile.build('/elm', '/build').then(function() {
-      assert.ok(elm.spawnSpy.calledOnce, 'Only one elm process spawned');
-      assert.ok(elm.jsMinifySpy.calledOnce, 'Minifier was called only once');
-      assert.ok(elm.writeFileSpy.calledOnce, 'Write file was called once');
+    elmBuild.module.build('/elm', '/build').then(function() {
+      assert.ok(elmBuild.spawnSpy.calledOnce, 'Only one elm process spawned');
+      assert.ok(elmBuild.jsMinifySpy.calledOnce, 'Minifier was called only once');
+      assert.ok(elmBuild.writeFileSpy.calledOnce, 'Write file was called once');
 
       assert.deepEqual(
-        elm.writeFileSpy.args[0],
+        elmBuild.writeFileSpy.args[0],
         ['/build/elm.js', MINIFIED_CODE_PLACEHOLDER],
         'Minified code was written to elm.js'
       );
@@ -59,29 +58,29 @@ suite('Elm compile', function() {
 
   suite('error cases', function() {
     test('elm-make bad exit code', function(done) {
-      var elm = elmCompileSpy({
+      var elmBuild = elmCompileSpy({
         spawn: function() {
           return fakeProcess().triggerClose(1).process;
         }
       });
 
-      elm.elmCompile.build('/elm', '/build').then(null, function() {
+      elmBuild.module.build('/elm', '/build').then(null, function() {
         assert.ok(true, 'Build promise was rejected');
-        assert.ok(!elm.jsMinifySpy.called, 'Minifier was not called');
+        assert.ok(!elmBuild.jsMinifySpy.called, 'Minifier was not called');
         done();
       });
     });
 
     test('elm-make errors', function(done) {
-      var elm = elmCompileSpy({
+      var elmBuild = elmCompileSpy({
         spawn: function() {
           return fakeProcess(['Some', ' ', 'errors']).triggerClose(0).process;
         }
       });
 
-      elm.elmCompile.build('/elm', '/build').then(null, function(err) {
+      elmBuild.module.build('/elm', '/build').then(null, function(err) {
         assert.ok(true, 'Build promise was rejected');
-        assert.ok(!elm.jsMinifySpy.called, 'Minifier was not called');
+        assert.ok(!elmBuild.jsMinifySpy.called, 'Minifier was not called');
 
         assert.deepEqual(
           err,
@@ -93,7 +92,7 @@ suite('Elm compile', function() {
     });
 
     test('copying to build dir fails', function(done) {
-      var elm = elmCompileSpy({
+      var elmBuild = elmCompileSpy({
         writeFile: function() {
           return new Bluebird.Promise(function() {
             throw new Error('System error!');
@@ -101,7 +100,7 @@ suite('Elm compile', function() {
         }
       });
 
-      elm.elmCompile.build('/elm', '/build').then(null, function(err) {
+      elmBuild.module.build('/elm', '/build').then(null, function(err) {
         assert.ok(true, 'Build promise was rejected');
         assert.deepEqual(err, { message: 'System error!' });
 
@@ -126,7 +125,7 @@ function elmCompileSpy(deps) {
   };
 
   return {
-    elmCompile   : elmCompile(elmCompileDeps),
+    module       : require('../src/build/elm-compile')(elmCompileDeps),
     spawnSpy     : elmCompileDeps.spawn,
     writeFileSpy : elmCompileDeps.writeFile,
     jsMinifySpy  : elmCompileDeps.jsMinify

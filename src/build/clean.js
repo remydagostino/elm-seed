@@ -11,12 +11,14 @@ module.exports = function(deps) {
   var createDir = deps.createDir;
 
   function clean(buildDir) {
-    return removeDir(buildDir)
+    var normalizedBuildDir = path.normalize(buildDir);
+
+    return removeDir(normalizedBuildDir)
     .then(function() {
-      return createDir(buildDir);
+      return createDir(normalizedBuildDir);
     })
     .then(function() {
-      return createDir(path.join(buildDir, 'static'));
+      return createDir(path.join(normalizedBuildDir, 'static'));
     });
   }
 
