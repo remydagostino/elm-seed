@@ -1,3 +1,15 @@
+- [ ] Proper error reporting for failed builds
+- [ ] Incremental compilation for JS resources
+- [ ] Only rebuild elm when source changes
+- [ ] Add support for middlware to be added to express server (best way?)
+- [ ] Add support for compiling and serving static assets
+- [ ] Add support for autoprefixed and compressed css
+- [ ] Command line tool with project scaffolding
+- [ ] Documentation and readme
+
+---
+
+
 Elm Seed
 ----------
 
