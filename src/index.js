@@ -9,15 +9,27 @@ var files = require('./util/files');
 
 var projectRoot = path.join(__dirname, '..');
 
-var elmCompile = require('./build/elm-compile')({
-  spawn: childProcess.spawn,
-  env: process.env,
-  writeFile: files.writeFile,
-  jsMinify: function(filePath) {
-    return new Bluebird.Promise(function(resolve) {
-      return resolve(uglify.minify(filePath));
-    });
-  }
+var builder = require('./build/build')({
+  elmCompile: require('./build/elm-compile')({
+    spawn: childProcess.spawn,
+    env: process.env,
+    writeFile: files.writeFile,
+    jsMinify: function(filePath) {
+      return new Bluebird.Promise(function(resolve) {
+        return resolve(uglify.minify(filePath));
+      });
+    }
+  }),
+
+  htmlBuild: require('./build/html-build')({
+    readFile: files.readFile,
+    writeFile: files.writeFile
+  }),
+
+  jsCompile: require('./build/js-compile')({
+    browserify: require('browserify'),
+    writeFile: files.writeFile
+  })
 });
 
 var cleanBuild = require('./build/clean')({
@@ -25,55 +37,32 @@ var cleanBuild = require('./build/clean')({
   createDir: files.createDir
 });
 
-var htmlBuild = require('./build/html-build')({
-  readFile: files.readFile,
-  writeFile: files.writeFile
-});
-
-var jsCompile = require('./build/js-compile')({
-  browserify: require('browserify'),
-  writeFile: files.writeFile
-});
-
 var server = require('./server/core')();
+var devServer = require('./server/dev')({ builder: builder });
 
-module.exports = {
-  build: build,
-  serveDev: serveDev,
-  serve: serve
-};
-
-function build(options) {
-  var buildDir = options.buildDir;
-  var elmDir = options.elmDir;
-
-  validateOptions(options);
-
-  return cleanBuild.clean(buildDir)
+var build = _.flow(validateOptions, function(options) {
+  return (
+    cleanBuild.clean(options.buildDir)
     .then(function() {
-      return elmCompile.build(elmDir, buildDir);
+      return builder.build(options, false, 0);
     })
+  );
+});
+
+var serveDev = _.flow(validateOptions, function(options) {
+  return cleanBuild.clean(options.buildDir)
     .then(function() {
-      return htmlBuild.build(
-        buildDir,
-        options.htmlPath || path.join(projectRoot, 'templates', 'index.html'),
-        { useCustomJs: Boolean(options.jsDir) }
+      return server.start(
+        options.port,
+        [
+          devServer.devStack(options),
+          server.serveAssets(options.buildDir, Boolean(options.jsDir))
+        ]
       );
-    })
-    .then(function() {
-      if (options.jsDir) {
-        return jsCompile.build(buildDir, options.jsDir);
-      }
     });
-}
+});
 
-function serveDev() {
-
-}
-
-function serve(options) {
-  validateOptions(options);
-
+var serve = _.flow(validateOptions, function(options) {
   return server.start(
     options.port,
     [
@@ -81,7 +70,7 @@ function serve(options) {
       server.serveAssets(options.buildDir, Boolean(options.jsDir))
     ]
   );
-}
+});
 
 function validateOptions(options) {
   if (!options.buildDir || !_.isString(options.buildDir)) {
@@ -99,4 +88,17 @@ function validateOptions(options) {
   if (!options.port || !_.isNumber(options.port)) {
     throw new Error('port (number) is required');
   }
+
+  return _.defaults(
+    _.clone(options),
+    {
+      htmlPath: path.join(projectRoot, 'templates', 'index.html')
+    }
+  );
 }
+
+module.exports = {
+  build: build,
+  serveDev: serveDev,
+  serve: serve
+};
