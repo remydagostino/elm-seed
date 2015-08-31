@@ -1,8 +1,29 @@
 var through = require('through');
+var Bluebird = require('bluebird');
 
 module.exports = {
-  bufferedThrough: bufferedThrough
+  bufferedThrough: bufferedThrough,
+  drain: drain
 };
+
+/**
+ * In cases where memory & backpressure are not an issue, it's simpler and more
+ * sensible to drain the whole stream and create a promise.
+ * @param  {Stream} stream The stream to be drained
+ * @return {Promise}       Resolves with the whole content of the stream
+ */
+function drain(stream) {
+  return new Bluebird.Promise(function(resolve, reject) {
+    var content = '';
+
+    stream
+      .on('error', reject)
+      .pipe(through(
+        function(data) { content += data; },
+        function() { resolve(content); }
+      ));
+  });
+}
 
 /**
  * Creates a tranformer stream that drains the whole input and applies

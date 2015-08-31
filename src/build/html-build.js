@@ -6,8 +6,8 @@ var htmlMinify = require('html-minifier');
 /**
  * Module generating function, requires dependencies to be injected
  *
- * @param  {Function} bufferFile   (filePath) => stream
- * @param  {Function} streamToFile (filePath, stream) => Promise
+ * @param  {Function} readFile   (filePath) => Promise
+ * @param  {Function} writeFile  (filePath, content) => Promise
  */
 module.exports = function(deps) {
   var readFile = deps.readFile;

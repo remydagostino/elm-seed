@@ -30,23 +30,24 @@ var htmlBuild = require('./build/html-build')({
   writeFile: files.writeFile
 });
 
+var jsCompile = require('./build/js-compile')({
+  browserify: require('browserify'),
+  writeFile: files.writeFile
+});
+
+var server = require('./server/core')();
+
 module.exports = {
   build: build,
-  devServer: devServer,
-  server: server
+  serveDev: serveDev,
+  serve: serve
 };
 
 function build(options) {
   var buildDir = options.buildDir;
   var elmDir = options.elmDir;
 
-  if (!buildDir || !_.isString(buildDir)) {
-    throw new Error('buildDir (string) is required');
-  }
-
-  if (!elmDir || !_.isString(elmDir)) {
-    throw new Error('elmDir (string) is required');
-  }
+  validateOptions(options);
 
   return cleanBuild.clean(buildDir)
     .then(function() {
@@ -58,13 +59,44 @@ function build(options) {
         options.htmlPath || path.join(projectRoot, 'templates', 'index.html'),
         { useCustomJs: Boolean(options.jsDir) }
       );
+    })
+    .then(function() {
+      if (options.jsDir) {
+        return jsCompile.build(buildDir, options.jsDir);
+      }
     });
 }
 
-function devServer() {
+function serveDev() {
 
 }
 
-function server() {
+function serve(options) {
+  validateOptions(options);
 
+  return server.start(
+    options.port,
+    [
+      server.productionStack,
+      server.serveAssets(options.buildDir, Boolean(options.jsDir))
+    ]
+  );
+}
+
+function validateOptions(options) {
+  if (!options.buildDir || !_.isString(options.buildDir)) {
+    throw new Error('buildDir (string) is required');
+  }
+
+  if (!path.isAbsolute(options.buildDir)) {
+    throw new Error('buildDir must be an absolute path');
+  }
+
+  if (!options.elmDir || !_.isString(options.elmDir)) {
+    throw new Error('elmDir (string) is required');
+  }
+
+  if (!options.port || !_.isNumber(options.port)) {
+    throw new Error('port (number) is required');
+  }
 }
