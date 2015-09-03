@@ -17,7 +17,12 @@ module.exports = function() {
 
     // Prevent errors from leaking
     app.use(function(err, req, res, next) {
-      console.error(err.stack); //eslint-disable-line
+      console.error(err.message); //eslint-disable-line
+
+      if (err.stack) {
+        console.error(err.stack); //eslint-disable-line
+      }
+
       res.sendStatus(500);
     });
 
