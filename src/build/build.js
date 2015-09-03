@@ -18,7 +18,10 @@ module.exports = function(deps) {
         return htmlBuild[buildLevel](
           buildDir,
           htmlPath,
-          { useCustomJs: Boolean(jsDir) }
+          {
+            useCustomJs: Boolean(jsDir),
+            title: config.name
+          }
         );
       })
       .then(function() {
