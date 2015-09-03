@@ -7,7 +7,7 @@ var Bluebird = require('bluebird');
 
 module.exports = function() {
   function start(port, middleware) {
-    var server = _.reduce(
+    var app = _.reduce(
       middleware,
       function(memo, ware) {
         return ware(memo);
@@ -16,13 +16,13 @@ module.exports = function() {
     );
 
     // Prevent errors from leaking
-    server.use(function(err, req, res, next) {
+    app.use(function(err, req, res, next) {
       console.error(err.stack); //eslint-disable-line
       res.sendStatus(500);
     });
 
     return new Bluebird.Promise(function(resolve) {
-      server.listen(port, function() {
+      var server = app.listen(port, function() {
         resolve(server);
       });
     });
