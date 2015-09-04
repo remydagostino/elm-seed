@@ -17,10 +17,12 @@ module.exports = function() {
 
     // Prevent errors from leaking
     app.use(function(err, req, res, next) {
-      console.error(err.message); //eslint-disable-line
-
-      if (err.stack) {
+      if (err.message && !err.stack) {
+        console.error(err.message); //eslint-disable-line
+      } else if (err.stack) {
         console.error(err.stack); //eslint-disable-line
+      } else {
+        console.error('unknown error', err); //eslint-disable-line
       }
 
       res.sendStatus(500);
@@ -40,9 +42,13 @@ module.exports = function() {
     return server;
   }
 
-  function serveAssets(buildDir, useCustomJs) {
+  function serveAssets(buildDir, useCustomJs, useCss) {
     return function(server) {
       server.use('/static',   express.static(path.join(buildDir, 'static')));
+
+      if (useCss) {
+        server.use('/styles', express.static(path.join(buildDir, 'styles')));
+      }
 
       if (useCustomJs) {
         server.get('/main.js', serveFile(path.join(buildDir, 'main.js')));

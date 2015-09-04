@@ -19,6 +19,9 @@ module.exports = function(deps) {
     })
     .then(function() {
       return createDir(path.join(normalizedBuildDir, 'static'));
+    })
+    .then(function() {
+      return createDir(path.join(normalizedBuildDir, 'styles'));
     });
   }
 

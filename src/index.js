@@ -29,6 +29,10 @@ var builder = require('./build/build')({
   jsCompile: require('./build/js-compile')({
     browserify: require('browserify'),
     writeFile: files.writeFile
+  }),
+
+  cssCompile: require('./build/css-compile')({
+    copyDir: files.copyDir
   })
 });
 
@@ -56,7 +60,11 @@ var serveDev = _.flow(validateOptions, function(options) {
         options.port,
         [
           devServer.devStack(options),
-          server.serveAssets(options.buildDir, Boolean(options.jsDir))
+          server.serveAssets(
+            options.buildDir,
+            Boolean(options.jsDir),
+            Boolean(options.cssDir)
+          )
         ]
       );
     });
@@ -67,7 +75,11 @@ var serve = _.flow(validateOptions, function(options) {
     options.port,
     [
       server.productionStack,
-      server.serveAssets(options.buildDir, Boolean(options.jsDir))
+      server.serveAssets(
+        options.buildDir,
+        Boolean(options.jsDir),
+        Boolean(options.cssDir)
+      )
     ]
   );
 });
