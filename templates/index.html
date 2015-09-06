@@ -18,8 +18,8 @@
       }
     </style>
 
-    <% if (useCss) { %>
-      <link rel="stylesheet" type="text/css" href="/styles/main.css">
+    <% if (cssPath) { %>
+      <link rel="stylesheet" type="text/css" href="/styles/<%= cssPath %>">
     <% } %>
   </head>
   <body>

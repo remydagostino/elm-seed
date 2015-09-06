@@ -7,34 +7,29 @@ module.exports = function(deps) {
   // Todo: Only build files changed since timestamp
   function build(config, devBuild, since) {
     var buildDir = config.buildDir;
-    var elmDir = config.elmDir;
-    var htmlPath = config.htmlPath;
-    var jsDir = config.jsDir;
-    var cssDir = config.cssDir;
-
     var buildLevel = devBuild ? 'devBuild' : 'build';
 
     return (
-      elmCompile[buildLevel](elmDir, buildDir)
+      elmCompile[buildLevel](buildDir, config.elm)
       .then(function() {
         return htmlBuild[buildLevel](
           buildDir,
-          htmlPath,
+          config.htmlPath,
           {
-            useCustomJs: Boolean(jsDir),
-            useCss: Boolean(cssDir),
-            title: config.name
+            title: config.name,
+            useCustomJs: Boolean(config.js),
+            cssPath: config.css && config.css.main
           }
         );
       })
       .then(function() {
-        if (jsDir) {
-          return jsCompile[buildLevel](buildDir, jsDir);
+        if (config.js) {
+          return jsCompile[buildLevel](buildDir, config.js);
         }
       })
       .then(function() {
-        if (cssDir) {
-          return cssCompile[buildLevel](buildDir, cssDir);
+        if (config.css) {
+          return cssCompile[buildLevel](buildDir, config.css);
         }
       })
     );

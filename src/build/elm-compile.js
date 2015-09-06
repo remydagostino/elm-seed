@@ -21,15 +21,13 @@ module.exports = function(deps) {
    * Builds and writes compiled elm source to the file system where they can be
    * served.
    *
-   * @param  {Function} compiler   (sourcePath, destinationPath) => Promise
-   * @param  {Function} writeFile  (destinationPath, content) => Promise
    * @param  {Boolean} devBuild    True = minify compiled files
-   * @param  {String} elmPath      Path to elm source
    * @param  {String} buildPath    Path to the build directory
+   * @param  {Object} elmOptions
    * @return {Promise}             Resolves with an empty object
    */
-  function build(devBuild, elmPath, buildPath) {
-    var elmMainFile = path.join(elmPath, 'App.elm');
+  function build(devBuild, buildPath, elmOptions) {
+    var elmMainFile = path.join(elmOptions.dir, elmOptions.main);
     var targetFile = path.join(buildPath, 'elm.js');
     var uncompressedTarget = path.join(buildPath, 'elm-uncompressed.js');
 
@@ -52,8 +50,6 @@ module.exports = function(deps) {
   /**
    * Compiles elm source files to a destination file.
    *
-   * @param  {Function} spawn  (binaryPath, args, options) => ChildProcess
-   * @param  {Object} env      Environment that the spawn should execute within
    * @param  {String} src      Path to the elm main source file
    * @param  {String} output   Path to the destination file
    * @return {Promise}         Resolves with an empty object when complete

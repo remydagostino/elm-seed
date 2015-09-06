@@ -60,11 +60,7 @@ var serveDev = _.flow(validateOptions, function(options) {
         options.port,
         [
           devServer.devStack(options),
-          server.serveAssets(
-            options.buildDir,
-            Boolean(options.jsDir),
-            Boolean(options.cssDir)
-          )
+          server.serveAssets(options)
         ]
       );
     });
@@ -74,39 +70,65 @@ var serve = _.flow(validateOptions, function(options) {
   return server.start(
     options.port,
     [
-      server.productionStack,
-      server.serveAssets(
-        options.buildDir,
-        Boolean(options.jsDir),
-        Boolean(options.cssDir)
-      )
+      server.productionStack(options.server),
+      server.serveAssets(options)
     ]
   );
 });
 
-function validateOptions(options) {
-  if (!options.buildDir || !_.isString(options.buildDir)) {
+function validateOptions(opt) {
+  // Todo: replace with json schema validation
+  if (!opt.buildDir || !_.isString(opt.buildDir)) {
     throw new Error('buildDir (string) is required');
   }
 
-  if (!path.isAbsolute(options.buildDir)) {
+  if (!path.isAbsolute(opt.buildDir)) {
     throw new Error('buildDir must be an absolute path');
   }
 
-  if (!options.elmDir || !_.isString(options.elmDir)) {
-    throw new Error('elmDir (string) is required');
-  }
-
-  if (!options.port || !_.isNumber(options.port)) {
+  if (!(opt.port && _.isNumber(opt.port))) {
     throw new Error('port (number) is required');
   }
 
-  return _.defaults(
-    _.clone(options),
-    {
-      htmlPath: path.join(projectRoot, 'templates', 'index.html')
+  if (!(opt.elm && _.isString(opt.elm.dir))) {
+    throw new Error('elmDir (string) is required');
+  }
+
+  // Clone options and apply defaults
+  return {
+    name: opt.name,
+    port: opt.port,
+
+    routes: opt.routes || {},
+
+    buildDir: opt.buildDir,
+    htmlPath: opt.htmlPath || path.join(projectRoot, 'templates', 'index.html'),
+
+    elm: {
+      dir: opt.elm.dir,
+      main: opt.elm.main || 'App.elm',
+      test: opt.elm.test
+    },
+
+    js: !_.isObject(opt.js) ? null : {
+      dir: opt.js.dir,
+      main: opt.js.main || 'main.js'
+    },
+
+    css: !_.isObject(opt.css) ? null : {
+      dir: opt.css.dir,
+      main: opt.css.main,
+      autoprefix: opt.css.autoprefix || ['> 1%'],
+      useImports: _.has(opt.css, 'useImports') ? opt.css.useImports : true,
+      useAssets: _.has(opt.css, 'useAssets') ? opt.css.useAssets : true
+    },
+
+    server: {
+      logRequests: _.has(opt.css, 'logRequests')
+        ? opt.css.logRequests
+        : 'common'
     }
-  );
+  };
 }
 
 module.exports = {

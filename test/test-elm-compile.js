@@ -11,7 +11,7 @@ suite('Elm compile', function() {
   test('success case (dev)', function(done) {
     var elmBuild = elmCompileSpy({});
 
-    elmBuild.module.devBuild('/elm', '/build').then(function() {
+    elmBuild.module.devBuild('/build', { dir: '/elm', main: 'App.elm'}).then(function() {
       assert.ok(elmBuild.spawnSpy.calledOnce, 'Only one elm process spawned');
       assert.ok(!elmBuild.jsMinifySpy.called, 'Minifier was not invoked');
 
@@ -41,7 +41,7 @@ suite('Elm compile', function() {
   test('success case (production)', function(done) {
     var elmBuild = elmCompileSpy({});
 
-    elmBuild.module.build('/elm', '/build').then(function() {
+    elmBuild.module.build('/build', { dir: '/elm', main: 'App.elm'}).then(function() {
       assert.ok(elmBuild.spawnSpy.calledOnce, 'Only one elm process spawned');
       assert.ok(elmBuild.jsMinifySpy.calledOnce, 'Minifier was called only once');
       assert.ok(elmBuild.writeFileSpy.calledOnce, 'Write file was called once');
@@ -64,7 +64,7 @@ suite('Elm compile', function() {
         }
       });
 
-      elmBuild.module.build('/elm', '/build').then(null, function() {
+      elmBuild.module.build('/build', { dir: '/elm', main: 'App.elm'}).then(null, function() {
         assert.ok(true, 'Build promise was rejected');
         assert.ok(!elmBuild.jsMinifySpy.called, 'Minifier was not called');
         done();
@@ -78,7 +78,7 @@ suite('Elm compile', function() {
         }
       });
 
-      elmBuild.module.build('/elm', '/build').then(null, function(err) {
+      elmBuild.module.build('/build', { dir: '/elm', main: 'App.elm'}).then(null, function(err) {
         assert.ok(true, 'Build promise was rejected');
         assert.ok(!elmBuild.jsMinifySpy.called, 'Minifier was not called');
 
@@ -100,7 +100,7 @@ suite('Elm compile', function() {
         }
       });
 
-      elmBuild.module.build('/elm', '/build').then(null, function(err) {
+      elmBuild.module.build('/build', { dir: '/elm', main: 'App.elm'}).then(null, function(err) {
         assert.ok(true, 'Build promise was rejected');
         assert.deepEqual(err, { message: 'System error!' });
 

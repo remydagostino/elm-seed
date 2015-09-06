@@ -35,27 +35,34 @@ module.exports = function() {
     });
   }
 
-  function productionStack(server) {
-    server.use(morgan('common'));
-    server.use(compression());
+  function productionStack(serverOpts) {
+    return function(server) {
+      if (serverOpts.logRequests) {
+        server.use(morgan(serverOpts.logRequests));
+      }
 
-    return server;
+      server.use(compression());
+
+      return server;
+    };
   }
 
-  function serveAssets(buildDir, useCustomJs, useCss) {
-    return function(server) {
-      server.use('/static',   express.static(path.join(buildDir, 'static')));
+  function serveAssets(options) {
+    var buildDir = options.buildDir;
 
-      if (useCss) {
+    return function(server) {
+      server.use('/static', express.static(path.join(buildDir, 'static')));
+
+      if (options.css) {
         server.use('/styles', express.static(path.join(buildDir, 'styles')));
       }
 
-      if (useCustomJs) {
+      if (options.js) {
         server.get('/main.js', serveFile(path.join(buildDir, 'main.js')));
       }
 
-      server.get('/elm.js',   serveFile(path.join(buildDir, 'elm.js')));
-      server.get('/',         serveFile(path.join(buildDir, 'index.html')));
+      server.get('/elm.js', serveFile(path.join(buildDir, 'elm.js')));
+      server.get('/', serveFile(path.join(buildDir, 'index.html')));
 
       return server;
     };

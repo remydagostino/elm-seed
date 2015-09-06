@@ -13,8 +13,8 @@ module.exports = function(deps) {
   var browserify = deps.browserify;
   var writeFile = deps.writeFile;
 
-  function build(devBuild, buildDir, jsDir) {
-    var mainJsPath = path.join(jsDir, 'main.js');
+  function build(devBuild, buildDir, options) {
+    var mainJsPath = path.join(options.dir, options.main);
 
     return streams.drain(browserify(mainJsPath).bundle())
       .then(function(js) {

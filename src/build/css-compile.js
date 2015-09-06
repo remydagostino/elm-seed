@@ -1,6 +1,4 @@
-var streams = require('../util/streams');
 var path = require('path');
-var uglify = require('uglify-js');
 var Bluebird = require('bluebird');
 
 var postcss = require('postcss');
@@ -16,29 +14,32 @@ var cssnano = require('cssnano');
 module.exports = function(deps) {
   var copyDir = deps.copyDir;
 
-  function build(devBuild, buildDir, cssDir) {
-    var cssDest = path.join(buildDir, 'styles')
+  function build(devBuild, buildDir, options) {
+    var cssDest = path.join(buildDir, 'styles');
 
     return copyDir(
-      cssDir,
+      options.dir,
       cssDest,
       {
         // Include all folders and all css files
         filter: /\/\w+(?!\.)$|\.css$/,
         transform: function(contents, file) {
-          return compileFile(devBuild, cssDest, cssDir, contents, file);
+          return compileFile(devBuild, options, cssDest, contents, file);
         }
       }
     );
   }
 
-  function compileFile(devBuild, cssDest, cssDir, cssContent, file) {
+  function compileFile(devBuild, options, cssDest, cssContent, file) {
     // Todo: investigate why postcss's promise doesn't seem to work
     return new Bluebird.Promise(function(resolve, reject) {
       var compiler = postcss();
 
-      compiler.use(postcssImport());
-      compiler.use(autoprefixer({ browsers: ['> 1%'] }));
+      if (options.useImports) {
+        compiler.use(postcssImport());
+      }
+
+      compiler.use(autoprefixer({ browsers: options.autoprefix }));
 
       if (!devBuild) {
         compiler.use(cssnano({ autoprefixer: false }));
@@ -49,13 +50,13 @@ module.exports = function(deps) {
           cssContent,
           {
             from: path.join(file.name),
-            to: path.join(cssDest, path.relative(cssDir, file.name))
+            to: path.join(cssDest, path.relative(options.dir, file.name))
           }
         )
         .then(
           function(result) { resolve(result.css); },
-          function(err)    { reject(err) }
-        )
+          function(err)    { reject(err); }
+        );
     });
   }
 

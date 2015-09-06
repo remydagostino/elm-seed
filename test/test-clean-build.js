@@ -10,11 +10,12 @@ suite('Clean build', function() {
 
     cleanBuild.module.clean('./build').then(function() {
       assert.ok(cleanBuild.removeDirSpy.calledOnce);
-      assert.ok(cleanBuild.createDirSpy.calledTwice);
+      assert.ok(cleanBuild.createDirSpy.calledThrice);
 
       assert.deepEqual(cleanBuild.removeDirSpy.args[0], ['build']);
       assert.deepEqual(cleanBuild.createDirSpy.args[0], ['build']);
       assert.deepEqual(cleanBuild.createDirSpy.args[1], ['build/static']);
+      assert.deepEqual(cleanBuild.createDirSpy.args[2], ['build/styles']);
 
       done();
     });
