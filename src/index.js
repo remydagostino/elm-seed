@@ -60,6 +60,7 @@ var serveDev = _.flow(validateOptions, function(options) {
         options.port,
         [
           devServer.devStack(options),
+          server.serveRoutes(options.routes),
           server.serveAssets(options)
         ]
       );
@@ -71,6 +72,7 @@ var serve = _.flow(validateOptions, function(options) {
     options.port,
     [
       server.productionStack(options.server),
+      server.serveRoutes(options.routes),
       server.serveAssets(options)
     ]
   );
@@ -132,6 +134,9 @@ function validateOptions(opt) {
 }
 
 module.exports = {
+  // Expose the express version used by the server
+  express: require('express'),
+
   build: build,
   serveDev: serveDev,
   serve: serve

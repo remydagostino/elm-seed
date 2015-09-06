@@ -1,7 +1,7 @@
 - [ ] Proper error reporting for failed builds
 - [ ] Incremental compilation for JS resources
 - [ ] Only rebuild elm when source changes
-- [ ] Add support for middlware to be added to express server (best way?)
+- [x] Add support for additional routes to be added to express server
 - [ ] Add support for compiling and serving static assets
 - [x] Add support for autoprefixed and compressed css
 - [ ] Command line tool with project scaffolding
@@ -25,8 +25,8 @@ Example Config
 
 ```js
 {
-  name: String
-  port: Number
+  name: String,
+  port: Number,
 
   buildDir: String, // Absolute path
   htmlPath: String,
@@ -49,7 +49,7 @@ Example Config
   server: {
     logRequests: String // null to disable
   },
-  routes: { // TODO
+  routes: {
     '/api': Function // (req, res, next) -> void
   }
 }

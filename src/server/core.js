@@ -68,6 +68,16 @@ module.exports = function() {
     };
   }
 
+  function serveRoutes(routes) {
+    return function(server) {
+      _.each(routes, function(router, key) {
+        server.use(key, router);
+      });
+
+      return server;
+    };
+  }
+
   function serveFile(file) {
     return function(req, res) {
       res.sendFile(file);
@@ -77,6 +87,7 @@ module.exports = function() {
   return {
     start: start,
     productionStack: productionStack,
-    serveAssets: serveAssets
+    serveAssets: serveAssets,
+    serveRoutes: serveRoutes
   };
 };
