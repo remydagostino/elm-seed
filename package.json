@@ -1,10 +1,9 @@
 {
   "name": "elm-seed",
   "version": "0.0.1",
-  "description": "A bootstrap library and command line tool for elm projects",
+  "description": "For developing and serving elm projects",
   "main": "src/index.js",
   "scripts": {
-    "build": "jstransform --strip-types --harmony src/ build/",
     "test": "./node_modules/.bin/mocha --ui tdd",
     "test-watch": "./node_modules/.bin/mocha --ui tdd --watch"
   },
