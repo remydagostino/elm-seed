@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var path = require('path');
 var Bluebird = require('bluebird');
-var elm = require('elm');
 
 /**
  * Module generating function, requires dependencies to be injected
@@ -32,9 +31,9 @@ module.exports = function(deps) {
     var uncompressedTarget = path.join(buildPath, 'elm-uncompressed.js');
 
     if (devBuild) {
-      return compile(elmMainFile, targetFile);
+      return compile(elmOptions.bin, elmMainFile, targetFile);
     } else {
-      return compile(elmMainFile, uncompressedTarget)
+      return compile(elmOptions.bin, elmMainFile, uncompressedTarget)
       .then(function() {
         return jsMinify(uncompressedTarget);
       })
@@ -54,10 +53,10 @@ module.exports = function(deps) {
    * @param  {String} output   Path to the destination file
    * @return {Promise}         Resolves with an empty object when complete
    */
-  function compile(src, output) {
+  function compile(elmBins, src, output) {
     var deferred = Bluebird.pending();
     var errContent = '';
-    var proc = spawnElmCompiler(src, output);
+    var proc = spawnElmCompiler(elmBins, src, output);
 
     proc.stderr.on('data', function(data) {
       errContent += data;
@@ -79,7 +78,7 @@ module.exports = function(deps) {
   /**
    * Spawns the elm compiler
    */
-  function spawnElmCompiler(source, outputPath) {
+  function spawnElmCompiler(elmBins, source, outputPath) {
     var processArgs = [
       source,
       '--yes',
@@ -89,7 +88,7 @@ module.exports = function(deps) {
     ];
 
     return spawn(
-      elm['elm-make'],
+      elmBins['elm-make'],
       processArgs,
       {
         env: _.merge({LANG: 'en_US.UTF-8'}, env),
