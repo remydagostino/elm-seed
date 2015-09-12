@@ -96,10 +96,6 @@ function validateOptions(opt) {
     throw new Error('elm.dir (string) is required');
   }
 
-  if (!(opt.elm.bin && _.isString(opt.elm.bin['elm-make']))) {
-    throw new Error('elm.bin.elm-make path to binary is required');
-  }
-
   // Clone options and apply defaults
   return {
     name: opt.name,
@@ -114,7 +110,7 @@ function validateOptions(opt) {
       dir: opt.elm.dir,
       main: opt.elm.main || 'App.elm',
       test: opt.elm.test,
-      bin: opt.elm.bin
+      bin: opt.elm.bin || { 'elm-make': 'elm-make' }
     },
 
     js: !_.isObject(opt.js) ? null : {
