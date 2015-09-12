@@ -42,7 +42,10 @@ var cleanBuild = require('./build/clean')({
 });
 
 var server = require('./server/core')();
-var devServer = require('./server/dev')({ builder: builder });
+var devServer = require('./server/dev')({
+  builder: builder,
+  templateDir: path.join(projectRoot, 'templates')
+});
 
 var build = _.flow(validateOptions, function(options) {
   return (

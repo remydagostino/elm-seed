@@ -1,4 +1,4 @@
-- [ ] Proper error reporting for failed builds
+- [x] Proper error reporting for failed builds
 - [ ] Incremental compilation for JS resources
 - [ ] Only rebuild elm when source changes
 - [x] Add support for additional routes to be added to express server

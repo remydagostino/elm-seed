@@ -1,3 +1,5 @@
+var Bluebird = require('bluebird');
+
 module.exports = function(deps) {
   var elmCompile = deps.elmCompile;
   var htmlBuild = deps.htmlBuild;
@@ -11,6 +13,12 @@ module.exports = function(deps) {
 
     return (
       elmCompile[buildLevel](buildDir, config.elm)
+      .catch(function(err) {
+        return Bluebird.reject({
+          type: 'elm-compile',
+          errors: err
+        });
+      })
       .then(function() {
         return htmlBuild[buildLevel](
           buildDir,

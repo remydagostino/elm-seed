@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Error compiling Elm</title>
+    <style media="screen" type="text/css">
+      html, body {
+        padding: 0;
+        margin: 0;
+        font-family: Helvetica, Arial, sans-serif;
+        background-color: #F2F2F2;
+        color: #333333;
+      }
+
+      .bodyType {
+        line-height: 1.4;
+      }
+
+      .errorPane {
+        width: 80%;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .errorPane__title {
+        color: #666;
+        padding: 20px 0;
+      }
+
+      .errorReport {
+        background-color: #fff;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-top: 6px solid #cc0000;
+      }
+
+      .codeSnippet {
+        box-sizing: border-box;
+        padding: 20px;
+        background-color: #333;
+        border-radius: 5px;
+        color: #fff;
+        overflow-y: auto;
+      }
+
+      .codeSnippet__lines {
+        display: table;
+      }
+
+      .codeSnippet_line {
+        display: table-row;
+      }
+
+      .codeSnippet_lineNum {
+        display: table-cell;
+        color: #999;
+        padding-right: 16px;
+      }
+
+      .codeSnippet_code {
+        display: table-cell;
+        width: 100%;
+      }
+
+      .codeSnippet_code strong {
+        font-weight: normal;
+      }
+
+      .codeSnippet_code em {
+        font-style: normal;
+        border-bottom: 2px solid #cc0000;
+      }
+
+      .errorReport__missingLines {
+        padding: 20px;
+        background-color: #999;
+        border-radius: 5px;
+        color: #E5E5E5;
+      }
+
+      .errorReport__missingLines > pre {
+        margin: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="errorPane">
+      <section class="errorPane__title">
+        <h1>Your program didn't compile.</h1>
+      </section>
+
+      <% _.forEach(errors, function(error) { %>
+        <% if (error.type === 'error') { %>
+          <section class="errorReport">
+            <h2><%- error.tag %></h2>
+            <p class="bodyType"><%- error.overview %></p>
+
+            <pre><%- error.file %></pre>
+            <% if (error.lines) { %>
+              <div class="codeSnippet">
+                <div class="codeSnippet__lines">
+                  <% _.forEach(error.lines, function(line) { %>
+                    <div class="codeSnippet_line">
+                      <pre class="codeSnippet_lineNum"><%- line.lineNum %></pre>
+                      <pre class="codeSnippet_code"><%= line.markup %></pre>
+                    </div>
+                  <% }); %>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="errorReport__missingLines">
+                <pre>... There are no lines to show ...</pre>
+              </div>
+            <% } %>
+
+            <p class="bodyType"><%= error.details.replace(/\n/g, '<br>') %></p>
+          </section>
+        <% } %>
+      <% }); %>
+    </div>
+  </body>
+</html>

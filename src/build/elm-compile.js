@@ -1,6 +1,9 @@
 var _ = require('lodash');
 var path = require('path');
 var Bluebird = require('bluebird');
+var fs = require('fs');
+var os = require('os');
+var highlight = require('../util/highlight');
 
 /**
  * Module generating function, requires dependencies to be injected
@@ -54,25 +57,52 @@ module.exports = function(deps) {
    * @return {Promise}         Resolves with an empty object when complete
    */
   function compile(elmBins, src, output) {
-    var deferred = Bluebird.pending();
-    var errContent = '';
-    var proc = spawnElmCompiler(elmBins, src, output);
+    return new Bluebird.Promise(function(resolve, reject) {
+      var proc = spawnElmCompiler(elmBins, src, output);
+      var results = '';
 
-    proc.stderr.on('data', function(data) {
-      errContent += data;
+      proc.stdout.on('data', function(data) {
+        results += data;
+      });
+
+      proc.on('close', function(exitCode) {
+        if (exitCode === 0) {
+          resolve();
+        } else {
+          getErrorContent(results).then(reject, reject);
+        }
+      });
     });
+  }
 
-    proc.on('close', function(exitCode) {
-      if (exitCode === 0 && errContent.length === 0) {
-        deferred.resolve();
-      } else {
-        deferred.reject({
-          message: errContent
-        });
-      }
+  function getErrorContent(errorString) {
+    return new Bluebird.Promise(function(resolve) {
+      resolve(JSON.parse(errorString));
+    })
+    .then(function(errors) {
+      return Bluebird.all(errors.map(expandElmError));
     });
+  }
 
-    return deferred.promise;
+  function expandElmError(error) {
+    return Bluebird.promisify(fs.readFile)(error.file, 'utf8')
+    .then(function(fileContents) {
+      var fileLines = fileContents.split(os.EOL);
+
+      return _.defaults(
+        {
+          lines: highlight.lines(
+            fileLines,
+            error.region,
+            error.subregion || error.region
+          )
+        },
+        error
+      );
+    })
+    .catch(function(err) {
+      return _.defaults({ lines: null }, error);
+    });
   }
 
   /**
@@ -82,7 +112,7 @@ module.exports = function(deps) {
     var processArgs = [
       source,
       '--yes',
-      // '--report=json',
+      '--report=json',
       // '--warn',
       '--output', outputPath.replace(/ /g, '\\ ')
     ];
