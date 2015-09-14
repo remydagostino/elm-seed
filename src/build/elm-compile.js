@@ -4,6 +4,7 @@ var Bluebird = require('bluebird');
 var fs = require('fs');
 var os = require('os');
 var highlight = require('../util/highlight');
+var parse = require('../util/parse');
 
 /**
  * Module generating function, requires dependencies to be injected
@@ -77,10 +78,17 @@ module.exports = function(deps) {
 
   function getErrorContent(errorString) {
     return new Bluebird.Promise(function(resolve) {
-      resolve(JSON.parse(errorString));
+      // Todo: figure out why Elm's output is in such a weird format
+      resolve(parse.multipleArrays(errorString));
     })
     .then(function(errors) {
       return Bluebird.all(errors.map(expandElmError));
+    })
+    .catch(function() {
+      return [{
+        type: 'unknown',
+        message: errorString
+      }];
     });
   }
 

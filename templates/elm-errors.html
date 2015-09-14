@@ -31,7 +31,14 @@
         background-color: #fff;
         padding: 20px;
         margin-bottom: 20px;
+      }
+
+      .errorReport[data-error-type=error] {
         border-top: 6px solid #cc0000;
+      }
+
+      .errorReport[data-error-type=warning] {
+        border-top: 6px solid #edd400;
       }
 
       .codeSnippet {
@@ -91,8 +98,8 @@
       </section>
 
       <% _.forEach(errors, function(error) { %>
-        <% if (error.type === 'error') { %>
-          <section class="errorReport">
+        <% if (error.type === 'error' || error.type === 'warning') { %>
+          <section class="errorReport" data-error-type="<%- error.type %>">
             <h2><%- error.tag %></h2>
             <p class="bodyType"><%- error.overview %></p>
 
@@ -115,6 +122,11 @@
             <% } %>
 
             <p class="bodyType"><%= error.details.replace(/\n/g, '<br>') %></p>
+          </section>
+        <% } else if (error.type === 'unknown') { %>
+          <section class="errorReport">
+            <h2>Unknown error</h2>
+            <p class="bodyType"><%- error.message %></p>
           </section>
         <% } %>
       <% }); %>
