@@ -6,6 +6,7 @@ var childProcess = require('child_process');
 var uglify = require('uglify-js');
 var path = require('path');
 var files = require('./util/files');
+var util = require('util');
 
 var projectRoot = path.join(__dirname, '..');
 
@@ -52,6 +53,9 @@ var build = _.flow(validateOptions, function(options) {
     cleanBuild.clean(options.buildDir)
     .then(function() {
       return builder.build(options, false, 0);
+    })
+    .catch(function(err) {
+      throw new Error(util.inspect(err));
     })
   );
 });

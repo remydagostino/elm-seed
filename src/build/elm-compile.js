@@ -43,9 +43,6 @@ module.exports = function(deps) {
       })
       .then(function(minified) {
         return writeFile(targetFile, minified.code);
-      })
-      .catch(function(err) {
-        return Bluebird.reject({ message: err.message });
       });
     }
   }
@@ -61,14 +58,24 @@ module.exports = function(deps) {
     return new Bluebird.Promise(function(resolve, reject) {
       var proc = spawnElmCompiler(elmBins, src, output);
       var results = '';
+      var errors = '';
 
       proc.stdout.on('data', function(data) {
         results += data;
       });
 
+      proc.stderr.on('data', function(data) {
+        errors += data;
+      });
+
       proc.on('close', function(exitCode) {
         if (exitCode === 0) {
           resolve();
+        } else if (errors.trim().length > 0) {
+          reject([{
+            type: 'unknown',
+            message: 'elm-make: ' + errors
+          }]);
         } else {
           getErrorContent(results).then(reject, reject);
         }
