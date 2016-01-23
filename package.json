@@ -1,6 +1,6 @@
 {
   "name": "elm-seed",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engine": "node 4.2.6",
   "description": "For developing and serving elm projects",
   "main": "src/index.js",
