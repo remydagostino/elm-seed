@@ -1,6 +1,7 @@
 {
   "name": "elm-seed",
   "version": "0.0.6",
+  "engine": "node 4.2.6",
   "description": "For developing and serving elm projects",
   "main": "src/index.js",
   "scripts": {
@@ -15,7 +16,7 @@
     "bluebird": "2.9.34",
     "browserify": "11.0.0",
     "compression": "1.5.2",
-    "cssnano": "2.6.1",
+    "cssnano": "3.4.0",
     "express": "4.13.1",
     "from": "0.1.3",
     "html-minifier": "0.7.2",
@@ -23,7 +24,7 @@
     "morgan": "1.6.1",
     "ncp": "2.0.0",
     "postcss": "4.1.16",
-    "postcss-assets": "2.1.2",
+    "postcss-assets": "2.1.4",
     "postcss-import": "6.1.1",
     "rimraf": "2.4.1",
     "through": "2.3.8",
