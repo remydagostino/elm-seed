@@ -72,6 +72,7 @@ module.exports = function(deps) {
         if (exitCode === 0) {
           resolve();
         } else if (errors.trim().length > 0) {
+          // TODO: Fix this so that it creates an error object
           reject([{
             type: 'unknown',
             message: 'elm-make: ' + errors

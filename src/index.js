@@ -134,8 +134,8 @@ function validateOptions(opt) {
     },
 
     server: {
-      logRequests: _.has(opt.css, 'logRequests')
-        ? opt.css.logRequests
+      logRequests: _.has(opt.server, 'logRequests')
+        ? opt.server.logRequests
         : 'common'
     }
   };

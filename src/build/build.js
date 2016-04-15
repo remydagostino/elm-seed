@@ -14,6 +14,7 @@ module.exports = function(deps) {
     return (
       elmCompile[buildLevel](buildDir, config.elm)
       .catch(function(err) {
+        // TODO: Fix this so that returns a proper error
         return Bluebird.reject({
           type: 'elm-compile',
           errors: err
